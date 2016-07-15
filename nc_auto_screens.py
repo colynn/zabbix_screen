@@ -41,7 +41,9 @@ def getGraphs(hostid):
     for graph in zapi.graph.get({ "output": "extend", "hostids":hostid }):
         graphs[graph['name']] = (graph['graphid'], selected)
     return graphs
+
 def graphsForScreens(hosts):
+    hosts.sort()
     if not hosts:
         print "hosts list is empty, exit..."
         sys.exit(1)
@@ -57,7 +59,12 @@ def graphsForScreens(hosts):
                         'MongoDB*Queries-Requests', 'MongoDB*Connections', 'MongoDB*Performance'
                         'Postgres*Connections', 'Postgres*Cache Hit/Read'
                         ]
-    graphs_dict = {}
+    try:
+        from collections import OrderedDict
+    except ImportError:
+        from ordereddict import OrderedDict
+    graphs_dict = OrderedDict()
+
     for hostid in hosts:
         host_graphs_list = []
         graphs = getGraphs(hostid)
@@ -74,6 +81,7 @@ def graphsForScreens(hosts):
         # host graphs is empty
         if not host_graphs_list:
             continue
+        host_graphs_list.sort()
         graphs_dict[hostid] = host_graphs_list
     return graphs_dict
 
