@@ -15,12 +15,15 @@ CustomerName=raw_input('Customer Name:')
 Username=raw_input('Zabbix Username:')
 Password=getpass.getpass('Zabbix Password:')
 
+
 def Login():
     try:
         zapi.login(Username, Password)
     except ZabbixAPIException, e:
         print("Error:Name or Password is wrong")
         sys.exit(1)
+
+
 def GetHostID():
     try:
         GroupID = zapi.hostgroup.get({ "output": "groupid", "filter": { "name": CustomerName} })[0]['groupid']
@@ -35,12 +38,15 @@ def GetHostID():
     for i in HostIDs:
         hostids.append(i['hostid'])
     return hostids
+
+
 def getGraphs(hostid):
     graphs = {}
     selected = '0'
     for graph in zapi.graph.get({ "output": "extend", "hostids":hostid }):
         graphs[graph['name']] = (graph['graphid'], selected)
     return graphs
+
 
 def graphsForScreens(hosts):
     hosts.sort()
@@ -85,6 +91,7 @@ def graphsForScreens(hosts):
         graphs_dict[hostid] = host_graphs_list
     return graphs_dict
 
+
 def CreateScreen(screen_name, HostList):
     screen_name='~Customer - ' + screen_name
     # Check if Screen exist
@@ -119,8 +126,28 @@ def CreateScreen(screen_name, HostList):
 
     print "Successfully Create Screen: %s!" % screen_name
 
+
+def delete_screen(screen_name, HostList):
+    screen_name = '~Customer - ' + screen_name
+    # Check if Screen exist
+    result = zapi.screen.exists({"name": screen_name})
+    if not result:
+        info = 1
+        print screen_name + " not exists "
+    screen_id = zapi.screen.get({"output": "screenid", "filter": {"name": screen_name}})[0]['screenid']
+    screen_arr = [screen_id]
+    try:
+        info = zapi.screen.delete(screen_arr)
+    except ZabbixAPIException, e:
+        info = e
+    if type(info) == "tuple":
+        print "failed, " + e 
+    else:
+        print "okay."
+
 if __name__=='__main__':
     Login()
     HostIDs=GetHostID()
     HostList=graphsForScreens(HostIDs)
     CreateScreen(CustomerName, HostList)
+    # delete_screen(CustomerName, HostList)
