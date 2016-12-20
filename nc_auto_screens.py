@@ -6,7 +6,7 @@ sys.path.append('./lib')
 
 from zabbix_api import ZabbixAPI, ZabbixAPIException
 
-url = 'https://zabbix-qa.service.chinanetcloud.com'
+url = 'https://zabbix.service.examplecloud.com'
 zapi = ZabbixAPI(server=url)
 graph_width = '200'
 graph_height = '100'
